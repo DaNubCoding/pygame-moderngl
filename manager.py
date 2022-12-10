@@ -3,13 +3,13 @@ import moderngl as gl
 import pygame
 import sys
 
+from player import Player
 from model import *
-from camera import Camera
 
 class Manager:
     def __init__(self):
         pygame.init()
-        self.WIDTH, self.HEIGHT = 800, 600
+        self.WIDTH, self.HEIGHT = 1400, 800
         pygame.display.gl_set_attribute(GL_CONTEXT_MAJOR_VERSION, 3)
         pygame.display.gl_set_attribute(GL_CONTEXT_MINOR_VERSION, 3)
         pygame.display.gl_set_attribute(GL_CONTEXT_PROFILE_MASK, GL_CONTEXT_PROFILE_CORE)
@@ -20,7 +20,8 @@ class Manager:
         self.clock = pygame.time.Clock()
         self.time = 0
         self.dt = 0
-        self.camera = Camera(self)
+        self.player = Player(self)
+        self.camera = self.player.camera
         self.blocks = []
         for x in range(-10, 11):
             for z in range(-10, 11):
@@ -31,6 +32,7 @@ class Manager:
     def update(self):
         self.dt = self.clock.tick(60)
         self.time = pygame.time.get_ticks()
+        pygame.display.set_caption(f"{round(self.clock.get_fps())}")
 
         self.first_pause = not self.paused
 
@@ -42,7 +44,7 @@ class Manager:
                     self.paused = not self.paused
                     pygame.mouse.set_visible(self.paused)
 
-        self.camera.update()
+        self.player.update()
         for block in self.blocks:
             block.update()
 
@@ -61,6 +63,7 @@ class Manager:
             self.draw()
 
     def quit(self):
-        self.scene.destroy()
+        for block in self.blocks:
+            block.destroy()
         pygame.quit()
         sys.exit()

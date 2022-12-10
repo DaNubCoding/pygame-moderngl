@@ -7,13 +7,14 @@ FOV = 75
 NEAR = 0.01
 FAR = 100
 SPEED = 0.004
-SENSITIVITY = 0.16
+SENSITIVITY = 0.02
 
 class Camera:
-    def __init__(self, manager):
+    def __init__(self, manager, player):
         self.manager = manager
+        self.player = player
         self.aspect_ratio = manager.WIDTH / manager.HEIGHT
-        self.pos = vec3(0, 2, 0)
+        self.pos = player.pos
         self.up = vec3(0, 1, 0)
         self.right = vec3(1, 0, 0)
         self.forward = vec3(0, 0, -1)
@@ -25,8 +26,8 @@ class Camera:
     def update(self):
         if not self.manager.paused and self.manager.first_pause:
             rel_x, rel_y = vec2(pygame.mouse.get_pos()) - vec2(self.manager.WIDTH // 2, self.manager.HEIGHT // 2)
-            self.yaw += rel_x * SENSITIVITY
-            self.pitch -= rel_y * SENSITIVITY
+            self.yaw += rel_x * SENSITIVITY * self.manager.dt
+            self.pitch -= rel_y * SENSITIVITY * self.manager.dt
             self.pitch = max(-89, min(89, self.pitch))
             
             yaw, pitch = glm.radians(self.yaw), glm.radians(self.pitch)
@@ -36,19 +37,7 @@ class Camera:
             self.forward = glm.normalize(self.forward)
             self.right = glm.normalize(glm.cross(self.forward, vec3(0, 1, 0)))
 
-        keys = pygame.key.get_pressed()
-        if keys[K_a]:
-            self.pos -= self.right * SPEED * self.manager.dt
-        if keys[K_d]:
-            self.pos += self.right * SPEED * self.manager.dt
-        if keys[K_s]:
-            self.pos -= glm.normalize(vec3(self.forward.x, 0, self.forward.z)) * SPEED * self.manager.dt
-        if keys[K_w]:
-            self.pos += glm.normalize(vec3(self.forward.x, 0, self.forward.z)) * SPEED * self.manager.dt
-        if keys[K_LSHIFT]:
-            self.pos -= self.up * SPEED * self.manager.dt
-        if keys[K_SPACE]:
-            self.pos += self.up * SPEED * self.manager.dt
+        self.pos = self.player.pos
 
         self.m_view = self.get_view_matrix()
 

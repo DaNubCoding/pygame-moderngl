@@ -33,7 +33,8 @@ class Block:
         self.vao.release()
 
     def get_texture(self, path):
-        texture = pygame.transform.scale(pygame.image.load(path).convert(), (1024, 1024))
+        texture = pygame.image.load(path).convert()
+        texture = pygame.transform.scale(texture, (1024, 1024))
         texture = pygame.transform.flip(texture, False, True)
         texture = self.context.texture(texture.get_size(), 3, pygame.image.tostring(texture, "RGB"))
         return texture
