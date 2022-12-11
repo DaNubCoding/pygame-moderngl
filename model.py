@@ -1,3 +1,4 @@
+import moderngl as gl
 import numpy as np
 import pygame
 import glm
@@ -37,10 +38,14 @@ class Block:
         texture = pygame.transform.scale(texture, (1024, 1024))
         texture = pygame.transform.flip(texture, False, True)
         texture = self.context.texture(texture.get_size(), 3, pygame.image.tostring(texture, "RGB"))
+        texture.filter = (gl.LINEAR_MIPMAP_LINEAR, gl.LINEAR)
+        texture.build_mipmaps()
+        texture.anisotropy = 32
         return texture
 
     def get_model_matrix(self):
         m_model = glm.mat4()
+        m_model = glm.translate(m_model, self.pos)
         return m_model
 
     def get_vao(self):
@@ -48,9 +53,8 @@ class Block:
         return vao
 
     def get_vertext_data(self):
-        vertices = np.asarray([(-1, -1, 1), (0, -1, 1), (0, 0, 1), (-1, 0, 1),
-                    (-1, 0, 0), (-1, -1, 0), (0, -1, 0), (0, 0, 0)])
-        vertices = np.add(vertices, [self.pos] * 8)
+        vertices = [(-1, -1, 1), (0, -1, 1), (0, 0, 1), (-1, 0, 1),
+                    (-1, 0, 0), (-1, -1, 0), (0, -1, 0), (0, 0, 0)]
         indices = [(0, 2, 3), (0, 1, 2),
                    (1, 7, 2), (1, 6, 7),
                    (6, 5, 4), (4, 7, 6),
